@@ -1,26 +1,17 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  SectionList,
-  ActivityIndicator,
-} from 'react-native';
+import {View, SectionList, Alert} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {UserListScreenProps} from '../../navigation/type';
-
-type UserDataType = {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-};
-
-//UserDataType.id == AlbumDataType.userId
-type AlbumDataType = {
-  userId: number;
-  id: number;
-  title: string;
-};
+import {
+  AlbumDataType,
+  UserDataType,
+  fetchUserData,
+  fetchAlbumData,
+} from '../../network/NetworkRequest';
+import AppActivityIndicator from '../../common_components/AppActivityIndicator';
+import {GlobalStyle} from '../../constants/GlobalStyle';
+import {GlobalStrings} from '../../constants/GlobalStrings';
+import SectionHeader from '../components/SectionHeader';
+import SectionItem from '../components/SectionItem';
 
 type SectionListItem = {
   title: string;
@@ -29,9 +20,6 @@ type SectionListItem = {
 };
 
 const UserList = ({navigation}: UserListScreenProps) => {
-  const url = 'https://jsonplaceholder.typicode.com/users';
-  const albumUrl = 'https://jsonplaceholder.typicode.com/albums?';
-
   const [userData, setUserData] = useState<UserDataType[]>([]);
   const [albumData, setAlbumData] = useState<AlbumDataType[]>([]);
   const [sectionListData, setSectionListData] = useState<SectionListItem[]>([]);
@@ -54,33 +42,37 @@ const UserList = ({navigation}: UserListScreenProps) => {
     }
   }, [userData, albumData]);
 
-  const fetchUserData = async () => {
+  const getUserData = async () => {
     try {
-      const response = await fetch(url);
-      const data = await response.json();
-      setUserData(data);
+      setIsLoading(true);
+      const userData = await fetchUserData();
+      setUserData(userData);
     } catch (error) {
-      console.error('Error fetching user data API:', error);
       setIsLoading(false);
+      Alert.alert(
+        GlobalStrings.networkErrorTitle,
+        GlobalStrings.networkErrorMessage,
+      );
     }
   };
 
-  // Function to fetch second API
-  const fetchAlbumData = async (parameter: number) => {
+  const getAlbumData = async (parameter: number) => {
     try {
-      const url = albumUrl + `userId=${parameter}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      setAlbumData(prevData => [...prevData, ...data]);
+      setIsLoading(true);
+      const userData = await fetchAlbumData(parameter);
+      setAlbumData(prevData => [...prevData, ...userData]);
     } catch (error) {
-      console.error('Error fetching album API:', error);
       setIsLoading(false);
+      Alert.alert(
+        GlobalStrings.networkErrorTitle,
+        GlobalStrings.networkErrorMessage,
+      );
     }
   };
 
   useEffect(() => {
-    // Call the first API
-    fetchUserData();
+    // Call the first user API
+    getUserData();
   }, []); // Empty dependency array to ensure this effect runs only once on component mount
 
   useEffect(() => {
@@ -89,47 +81,44 @@ const UserList = ({navigation}: UserListScreenProps) => {
       // Assuming 'parameterKey' is the key you want to pass to the second API
       const parameter = item.id;
       // Call the second API for each element of the first API response
-      fetchAlbumData(parameter);
+      getAlbumData(parameter);
     });
   }, [userData]);
 
-  function getListViewItem(albumId: number) {
-    console.log('albumId=' + albumId);
-
+  function getListViewItem(albumId: number, albumTitle: string) {
     navigation.navigate('PhotoListScreen', {
       albumId: albumId,
+      albumName: albumTitle,
     });
   }
+
+  const renderItem = ({item}: {item: AlbumDataType}) => (
+    <SectionItem
+      title={item.title}
+      onPress={() => getListViewItem(item.id, item.title)}
+    />
+  );
+
+  const renderSectionHeader = ({
+    section: {title},
+  }: {
+    section: {title: string};
+  }) => <SectionHeader title={title} />;
 
   return (
     <View>
       {isLoading ? (
-        <ActivityIndicator
+        <AppActivityIndicator
           size="large"
-          color="#0000ff"
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 40,
-          }}
+          color={GlobalStyle.Appcolors.primary500}
         />
       ) : (
         <SectionList
+          stickySectionHeadersEnabled
           sections={sectionListData}
           keyExtractor={(item, index) => item.id.toString() + index.toString()}
-          renderItem={({item}) => (
-            <View>
-              <Text onPress={() => getListViewItem(item.id)}>
-                {item.title}
-                <Text> userid={item.userId}</Text>
-                <Text> id={item.id}</Text>
-              </Text>
-            </View>
-          )}
-          renderSectionHeader={({section: {title}}) => (
-            <Text style={{fontWeight: 'bold', fontSize: 20}}>{title}</Text>
-          )}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
         />
       )}
     </View>
@@ -137,22 +126,3 @@ const UserList = ({navigation}: UserListScreenProps) => {
 };
 
 export default UserList;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 20,
-    marginHorizontal: 16,
-  },
-  item: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
-  },
-  header: {
-    fontSize: 32,
-  },
-  title: {
-    fontSize: 24,
-  },
-});
