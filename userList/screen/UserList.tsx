@@ -1,5 +1,12 @@
-import {View, SectionList, Alert} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {
+  View,
+  SectionList,
+  Alert,
+  NativeModules,
+  Button,
+  Platform,
+} from 'react-native';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {UserListScreenProps} from '../../navigation/type';
 import {
   AlbumDataType,
@@ -12,6 +19,7 @@ import {GlobalStyle} from '../../constants/GlobalStyle';
 import {GlobalStrings} from '../../constants/GlobalStrings';
 import SectionHeader from '../components/SectionHeader';
 import SectionItem from '../components/SectionItem';
+import { ReactOneCustomMethod } from '../../custome_modules/DeviceId';
 
 type SectionListItem = {
   title: string;
@@ -20,6 +28,31 @@ type SectionListItem = {
 };
 
 const UserList = ({navigation}: UserListScreenProps) => {
+
+ 
+  const [id, setId] = useState<string>();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => {
+        if (Platform.OS == 'android')
+          return <Button title="Show message" onPress={getId}></Button>;
+      },
+    });
+  }, []);
+
+  const getId = () => {
+    ReactOneCustomMethod.showMessage('Hello from native module!');
+    /*  ReactOneCustomMethod.getPhoneID()
+      .then((res: string) => {
+        setId(res);
+        console.log("phone id ="+id)
+      })
+      .catch((err: any) => {
+        console.error(err);
+      });*/
+  };
+
   const [userData, setUserData] = useState<UserDataType[]>([]);
   const [albumData, setAlbumData] = useState<AlbumDataType[]>([]);
   const [sectionListData, setSectionListData] = useState<SectionListItem[]>([]);
@@ -106,7 +139,7 @@ const UserList = ({navigation}: UserListScreenProps) => {
   }) => <SectionHeader title={title} />;
 
   return (
-    <View>
+    <View style={GlobalStyle.container}>
       {isLoading ? (
         <AppActivityIndicator
           size="large"
