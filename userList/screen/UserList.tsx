@@ -1,76 +1,63 @@
-import {
-  View,
-  SectionList,
-  Alert,
-  NativeModules,
-  Button,
-  Platform,
-} from 'react-native';
+import {View, SectionList, Alert, Button, Platform} from 'react-native';
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {UserListScreenProps} from '../../navigation/type';
-import {
-  AlbumDataType,
-  UserDataType,
-  fetchUserData,
-  fetchAlbumData,
-} from '../../network/NetworkRequest';
+import {fetchUserData, fetchAlbumData} from '../../network/NetworkRequest';
 import AppActivityIndicator from '../../common_components/AppActivityIndicator';
 import {GlobalStyle} from '../../constants/GlobalStyle';
 import {GlobalStrings} from '../../constants/GlobalStrings';
 import SectionHeader from '../components/SectionHeader';
 import SectionItem from '../components/SectionItem';
-import { ReactOneCustomMethod } from '../../custome_modules/DeviceId';
-
-type SectionListItem = {
-  title: string;
-  data: AlbumDataType[]; // Assuming SecondAPIResponse is the type of your second API response
-  // Add other properties as needed
-};
+import {fetchDeviceId} from '../../custome_modules/DeviceId';
+import {useDispatch, useSelector} from 'react-redux';
+import {addAlbum} from '../../store/Album';
+import {
+  AlbumDataType,
+  SectionListItemType,
+  UserDataType,
+} from '../../model/model';
+import ImageButton from '../../common_components/ImageButton';
 
 const UserList = ({navigation}: UserListScreenProps) => {
-
- 
-  const [id, setId] = useState<string>();
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => {
         if (Platform.OS == 'android')
-          return <Button title="Show message" onPress={getId}></Button>;
+          return (
+            <ImageButton
+              imgSource={require('../../assets/images/message_icon.webp')}
+              onPress={fetchDeviceId}
+            />
+          );
       },
     });
   }, []);
 
-  const getId = () => {
-    ReactOneCustomMethod.showMessage('Hello from native module!');
-    /*  ReactOneCustomMethod.getPhoneID()
-      .then((res: string) => {
-        setId(res);
-        console.log("phone id ="+id)
-      })
-      .catch((err: any) => {
-        console.error(err);
-      });*/
-  };
-
   const [userData, setUserData] = useState<UserDataType[]>([]);
   const [albumData, setAlbumData] = useState<AlbumDataType[]>([]);
-  const [sectionListData, setSectionListData] = useState<SectionListItem[]>([]);
+  const [sectionListData, setSectionListData] = useState<SectionListItemType[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const dispatch = useDispatch();
+  const sectionList: SectionListItemType[] = useSelector(
+    (state: any) => state.sectionList.value,
+  );
 
   useEffect(() => {
     // Combine responses into section list data
     if (userData.length > 0 && albumData.length > 0) {
-      const combinedData: SectionListItem[] = userData.map(userDataItem => {
+      const combinedData: SectionListItemType[] = userData.map(userDataItem => {
         const matchingAlbumItems = albumData.filter(
           albumItem => albumItem.userId === userDataItem.id,
         );
-        return {
+        const sectionItem: SectionListItemType = {
           title: userDataItem.name,
           data: matchingAlbumItems,
         };
+        return sectionItem;
       });
-      setSectionListData(combinedData);
+      dispatch(addAlbum(combinedData));
       setIsLoading(false);
     }
   }, [userData, albumData]);
@@ -111,9 +98,8 @@ const UserList = ({navigation}: UserListScreenProps) => {
   useEffect(() => {
     // Iterate over the first API response and call the second API for each element
     userData.forEach(item => {
-      // Assuming 'parameterKey' is the key you want to pass to the second API
       const parameter = item.id;
-      // Call the second API for each element of the first API response
+      // Call the album API for each element of the first API response
       getAlbumData(parameter);
     });
   }, [userData]);
@@ -125,9 +111,11 @@ const UserList = ({navigation}: UserListScreenProps) => {
     });
   }
 
-  const renderItem = ({item}: {item: AlbumDataType}) => (
+  const renderSectionItem = ({item}: {item: AlbumDataType}) => (
     <SectionItem
       title={item.title}
+      id={item.id}
+      userId={item.userId}
       onPress={() => getListViewItem(item.id, item.title)}
     />
   );
@@ -148,9 +136,9 @@ const UserList = ({navigation}: UserListScreenProps) => {
       ) : (
         <SectionList
           stickySectionHeadersEnabled
-          sections={sectionListData}
+          sections={sectionList}
           keyExtractor={(item, index) => item.id.toString() + index.toString()}
-          renderItem={renderItem}
+          renderItem={renderSectionItem}
           renderSectionHeader={renderSectionHeader}
         />
       )}

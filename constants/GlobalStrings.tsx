@@ -4,5 +4,6 @@ export const GlobalStrings = {
   networkErrorMessage: 'Failed to fetch user data. Please try again later.',
   networkErrorTitle: 'Error',
   allPhotos: 'All Photos',
-  userList:'User List',
+  userList: 'User List',
+  androidToastMessage: 'Your device id is :',
 };

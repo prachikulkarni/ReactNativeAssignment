@@ -1,26 +1,6 @@
+import {AlbumDataType, PhotoDataType, UserDataType} from '../model/model';
+
 const BASE_URL = 'https://jsonplaceholder.typicode.com/';
-
-export type UserDataType = {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-};
-
-//UserDataType.id == AlbumDataType.userId
-export type AlbumDataType = {
-  userId: number;
-  id: number;
-  title: string;
-};
-
-export type PhotoDataType = {
-  albumId: number;
-  id: number;
-  title: string;
-  url: string;
-  thumbnailUrl: string;
-};
 
 // Function to fetch Users API
 export const fetchUserData = async (): Promise<UserDataType[]> => {

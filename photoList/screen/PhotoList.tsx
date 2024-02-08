@@ -1,11 +1,13 @@
 import {Button, FlatList, View, Alert} from 'react-native';
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {PhotoListScreenProps} from '../../navigation/type';
-import {PhotoDataType, fetchPhotoData} from '../../network/NetworkRequest';
+import {fetchPhotoData} from '../../network/NetworkRequest';
 import SquareImage from '../components/SquareImage';
 import AppActivityIndicator from '../../common_components/AppActivityIndicator';
 import {GlobalStyle} from '../../constants/GlobalStyle';
 import {GlobalStrings} from '../../constants/GlobalStrings';
+import {PhotoDataType} from '../../model/model';
+import ImageButton from '../../common_components/ImageButton';
 
 const PhotoList = ({navigation, route}: PhotoListScreenProps) => {
   const [photoData, setPhotoData] = useState<PhotoDataType[]>([]);
@@ -34,7 +36,16 @@ const PhotoList = ({navigation, route}: PhotoListScreenProps) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => {
-        return <Button title="Tap me" onPress={handleTapMe}></Button>;
+        return (
+          <ImageButton
+            imgSource={
+              showUserPhotos
+                ? require('../../assets/images/filtered_icon.webp')
+                : require('../../assets/images/nonfiltered_icon.webp')
+            }
+            onPress={handleTapMe}
+          />
+        );
       },
       title: showUserPhotos ? route.params.albumName : GlobalStrings.allPhotos,
     });

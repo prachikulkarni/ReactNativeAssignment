@@ -1,24 +1,51 @@
-import {Platform, Pressable, StyleSheet, Text, View} from 'react-native';
+import {
+  Button,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
 import {GlobalStyle} from '../../constants/GlobalStyle';
+import {useDispatch} from 'react-redux';
+import {deleteAlbumItem} from '../../store/Album';
+import ImageButton from '../../common_components/ImageButton';
 
 type sectionItemProps = {
   title: string;
+  userId: number;
+  id: number;
   onPress: () => void;
 };
 
-const SectionItem = ({title, onPress}: sectionItemProps) => {
+const SectionItem = ({title, id, userId, onPress}: sectionItemProps) => {
+  const dispatch = useDispatch();
+
+  function deleteItem(id: number) {
+    dispatch(deleteAlbumItem(id));
+  }
+
   return (
-    <View style={styles.outerContaner}>
+    <View style={styles.outerContainer}>
       <Pressable
         onPress={onPress}
         android_ripple={{color: GlobalStyle.Appcolors.sectionItemText}}
         style={({pressed}) => [
-          styles.buttonStyle,
+          styles.buttonContainer,
           pressed ? styles.buttonPressed : null,
         ]}>
         <View style={styles.innerContainer}>
-          <Text style={styles.title}>{title}</Text>
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>{title}</Text>
+          </View>
+
+          <ImageButton
+            imgSource={require('../../assets/images/delete_icon.webp')}
+            onPress={() => deleteItem(id)}
+          />
         </View>
       </Pressable>
     </View>
@@ -28,35 +55,40 @@ const SectionItem = ({title, onPress}: sectionItemProps) => {
 export default SectionItem;
 
 const styles = StyleSheet.create({
-  outerContaner: {
-    flex: 1,
-    margin: 2,
-    height: 40,
-    borderRadius: 8,
-    elevation: 4,
-    backgroundColor: 'white',
-    shadowColor: 'black',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    overflow: Platform.OS == 'android' ? 'hidden' : 'visible',
+  outerContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  buttonStyle: {
+  textContainer: {
     flex: 1,
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   buttonPressed: {
-    opacity: 0.25,
+    opacity: 0.85,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'lightgray',
+    borderRadius: 5,
+    padding: 10,
   },
   innerContainer: {
     flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
-    marginStart:5
-  },
-  containerPressed: {
-    backgroundColor: GlobalStyle.Appcolors.sectionBg,
+    paddingStart: 5,
+    paddingEnd: 5,
   },
   title: {
+    textAlignVertical: 'center',
     fontSize: 14,
     color: GlobalStyle.Appcolors.sectionHeaderText,
+  },
+  deleteButton: {
+    width: 30,
+    height: 30,
   },
 });
