@@ -16,7 +16,7 @@ export const GlobalStyle = {
     sectionHeaderText: '#333',
     sectionItemText: '#ccc',
     sectionItemBg: '#fff',
-    sectionBg:'#e6e6e6'
+    sectionBg: '#e6e6e6',
   },
   container: {
     flex: 1,

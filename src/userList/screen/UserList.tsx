@@ -10,14 +10,23 @@ import SectionItem from '../components/SectionItem';
 import {fetchDeviceId} from '../../custome_modules/DeviceId';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAlbum} from '../../store/Album';
+
+import ImageButton from '../../common_components/ImageButton';
 import {
   AlbumDataType,
   SectionListItemType,
   UserDataType,
 } from '../../model/model';
-import ImageButton from '../../common_components/ImageButton';
 
 const UserList = ({navigation}: UserListScreenProps) => {
+  const [userData, setUserData] = useState<UserDataType[]>([]);
+  const [albumData, setAlbumData] = useState<AlbumDataType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const sectionList: SectionListItemType[] = useSelector(
+    (state: any) => state.sectionList.value,
+  );
+  const dispatch = useDispatch();
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => {
@@ -32,20 +41,21 @@ const UserList = ({navigation}: UserListScreenProps) => {
     });
   }, []);
 
-  const [userData, setUserData] = useState<UserDataType[]>([]);
-  const [albumData, setAlbumData] = useState<AlbumDataType[]>([]);
-  const [sectionListData, setSectionListData] = useState<SectionListItemType[]>(
-    [],
-  );
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const dispatch = useDispatch();
-  const sectionList: SectionListItemType[] = useSelector(
-    (state: any) => state.sectionList.value,
-  );
-
+  // Call the  user API
   useEffect(() => {
-    // Combine responses into section list data
+    getUserData();
+  }, []);
+
+  // Call the album API for each element of the first API response
+  useEffect(() => {
+    userData.forEach(item => {
+      const parameter = item.id;
+      getAlbumData(parameter);
+    });
+  }, [userData]);
+
+  // Combine responses into section list data
+  useEffect(() => {
     if (userData.length > 0 && albumData.length > 0) {
       const combinedData: SectionListItemType[] = userData.map(userDataItem => {
         const matchingAlbumItems = albumData.filter(
@@ -90,21 +100,7 @@ const UserList = ({navigation}: UserListScreenProps) => {
     }
   };
 
-  useEffect(() => {
-    // Call the first user API
-    getUserData();
-  }, []); // Empty dependency array to ensure this effect runs only once on component mount
-
-  useEffect(() => {
-    // Iterate over the first API response and call the second API for each element
-    userData.forEach(item => {
-      const parameter = item.id;
-      // Call the album API for each element of the first API response
-      getAlbumData(parameter);
-    });
-  }, [userData]);
-
-  function getListViewItem(albumId: number, albumTitle: string) {
+  function navigateToPhotoScreen(albumId: number, albumTitle: string) {
     navigation.navigate('PhotoListScreen', {
       albumId: albumId,
       albumName: albumTitle,
@@ -116,7 +112,7 @@ const UserList = ({navigation}: UserListScreenProps) => {
       title={item.title}
       id={item.id}
       userId={item.userId}
-      onPress={() => getListViewItem(item.id, item.title)}
+      onPress={() => navigateToPhotoScreen(item.id, item.title)}
     />
   );
 

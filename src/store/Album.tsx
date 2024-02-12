@@ -1,6 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {} from '../network/NetworkRequest';
-import { SectionListItemType } from '../model/model';
+import {SectionListItemType} from '../model/model';
 
 // Define a type for the slice state
 interface AlbumState {

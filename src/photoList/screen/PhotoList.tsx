@@ -1,6 +1,6 @@
-import {Button, FlatList, View, Alert} from 'react-native';
+import {FlatList, View, Alert} from 'react-native';
 import React, {useEffect, useLayoutEffect, useState} from 'react';
-import {PhotoListScreenProps} from '../../navigation/type';
+
 import {fetchPhotoData} from '../../network/NetworkRequest';
 import SquareImage from '../components/SquareImage';
 import AppActivityIndicator from '../../common_components/AppActivityIndicator';
@@ -8,6 +8,7 @@ import {GlobalStyle} from '../../constants/GlobalStyle';
 import {GlobalStrings} from '../../constants/GlobalStrings';
 import {PhotoDataType} from '../../model/model';
 import ImageButton from '../../common_components/ImageButton';
+import {PhotoListScreenProps} from '../../navigation/type';
 
 const PhotoList = ({navigation, route}: PhotoListScreenProps) => {
   const [photoData, setPhotoData] = useState<PhotoDataType[]>([]);

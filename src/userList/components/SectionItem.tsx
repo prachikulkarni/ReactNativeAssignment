@@ -1,13 +1,4 @@
-import {
-  Button,
-  Image,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Pressable, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {GlobalStyle} from '../../constants/GlobalStyle';
 import {useDispatch} from 'react-redux';
@@ -21,7 +12,7 @@ type sectionItemProps = {
   onPress: () => void;
 };
 
-const SectionItem = ({title, id, userId, onPress}: sectionItemProps) => {
+const SectionItem = ({title, id, onPress}: sectionItemProps) => {
   const dispatch = useDispatch();
 
   function deleteItem(id: number) {
@@ -41,7 +32,6 @@ const SectionItem = ({title, id, userId, onPress}: sectionItemProps) => {
           <View style={styles.textContainer}>
             <Text style={styles.title}>{title}</Text>
           </View>
-
           <ImageButton
             imgSource={require('../../assets/images/delete_icon.webp')}
             onPress={() => deleteItem(id)}
@@ -86,9 +76,5 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     fontSize: 14,
     color: GlobalStyle.Appcolors.sectionHeaderText,
-  },
-  deleteButton: {
-    width: 30,
-    height: 30,
   },
 });
